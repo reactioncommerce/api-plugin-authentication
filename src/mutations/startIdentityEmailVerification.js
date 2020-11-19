@@ -1,6 +1,4 @@
-import ReactionError from "@reactioncommerce/reaction-error";
 import SimpleSchema from "simpl-schema";
-import generateVerificationTokenObject from "@reactioncommerce/api-utils/generateVerificationTokenObject.js";
 
 const inputSchema = new SimpleSchema({
   email: {
@@ -24,37 +22,6 @@ const inputSchema = new SimpleSchema({
  */
 export default async function startIdentityEmailVerification(context, input) {
   inputSchema.validate(input);
-  const { collections: { users } } = context;
-
-  const { email, userId } = input;
-
-  // Make sure the user exists, and email is one of their addresses.
-  const user = await users.findOne({ _id: userId });
-  if (!user) throw new ReactionError("not-found", "User not found");
-
-  let address;
-  if (email) {
-    if (!user.emails || !user.emails.map((mailInfo) => mailInfo.address).includes(email)) {
-      throw new ReactionError("not-found", "Email not found");
-    }
-    address = email;
-  } else {
-    const unverifiedRecord = (user.emails || []).find((item) => !item.verified);
-    if (!unverifiedRecord) throw new ReactionError("not-found", "No unverified email found");
-    ({ address } = unverifiedRecord);
-  }
-
-  const tokenObj = generateVerificationTokenObject({ address });
-
-  try {
-    await users.updateOne({ _id: userId }, {
-      $push: {
-        "services.email.verificationTokens": tokenObj
-      }
-    });
-  } catch (error) {
-    throw new ReactionError("error-occurred", "Unable to set email verification token");
-  }
-
-  return { email: address, token: tokenObj.token };
+  const { email } = input;
+  return { email, token: 'random-token' + Date.now() };
 }

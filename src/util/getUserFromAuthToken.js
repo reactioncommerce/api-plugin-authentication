@@ -37,10 +37,23 @@ async function getUserFromAuthToken(loginToken, context) {
     throw new Error("Bearer token is not an access token");
   }
 
-  const currentUser = await context.collections.users.findOne({ _id });
-  if (!currentUser) {
-    Logger.error("Bearer token specifies a user ID that does not exist");
-    throw new Error("Bearer token specifies a user ID that does not exist");
+  let currentUser = {_id};
+  // Identity provider will provide extra information about user in
+  // ext field in initial logins.
+  if(tokenObj.ext) {
+    const {email, id, name, picture } = tokenObj.ext
+    if(!email || !id || !name) {
+      Logger.error("Bearer token does not contain user profile. Such user may not exist in the system.");
+      throw new Error("Bearer token does not contain user profile. Such user may not exist in the system.");
+    }
+    currentUser = { ...currentUser,
+      name,
+      emails: [{address: email}],
+      profile: {
+        name,
+        picture,
+      },
+    }
   }
 
   return currentUser;
