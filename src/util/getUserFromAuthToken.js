@@ -25,35 +25,41 @@ async function getUserFromAuthToken(loginToken, context) {
     throw new Error("No token object");
   }
 
-  const { active, sub: _id, token_type: tokenType } = tokenObj;
+  const { active, sub: _id, token_type: tokenType, token_use: tokenUse } = tokenObj;
 
   if (!active) {
     Logger.debug("Bearer token is expired");
     throw new Error("Bearer token is expired");
   }
 
-  if (tokenType !== "access_token") {
+  if (tokenType !== "Bearer") {
     Logger.error("Bearer token is not an access token");
     throw new Error("Bearer token is not an access token");
   }
 
-  let currentUser = {_id};
+  if (tokenUse !== "access_token") {
+    Logger.error("Bearer token is not an access token");
+    throw new Error("Bearer token is not an access token");
+  }
+
+  let currentUser = { _id };
   // Identity provider will provide extra information about user in
   // ext field in initial logins.
-  if(tokenObj.ext) {
-    const {email, id, name, picture } = tokenObj.ext
-    if(!email || !id || !name) {
+  if (tokenObj.ext) {
+    const { email, id, name, picture } = tokenObj.ext;
+    if (!email || !id || !name) {
       Logger.error("Bearer token does not contain user profile. Such user may not exist in the system.");
       throw new Error("Bearer token does not contain user profile. Such user may not exist in the system.");
     }
-    currentUser = { ...currentUser,
+    currentUser = {
+      ...currentUser,
       name,
-      emails: [{address: email}],
+      emails: [{ address: email }],
       profile: {
         name,
-        picture,
-      },
-    }
+        picture
+      }
+    };
   }
 
   return currentUser;
