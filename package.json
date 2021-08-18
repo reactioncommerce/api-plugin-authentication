@@ -26,7 +26,7 @@
   "sideEffects": false,
   "dependencies": {
     "@accounts/graphql-api": "^0.32.0",
-    "@accounts/mongo": "^0.32.0",
+    "@accounts/mongo": "^0.33.0",
     "@accounts/password": "^0.32.0",
     "@accounts/server": "^0.32.0",
     "@graphql-modules/core": "^0.7.17",
