@@ -52,8 +52,7 @@ workflows:
   version: 2
   build_deploy:
     jobs:
-      - build:
-          context: reaction-publish-semantic-release
+      - build
       - lint:
           requires:
             - build
@@ -61,6 +60,8 @@ workflows:
           context: reaction-publish-semantic-release
           requires:
             - lint
+            - test
+            - test-integration
           filters:
             branches:
               only: trunk
